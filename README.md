@@ -1,4 +1,4 @@
-#Diffusion-Based Image Enhancement
+# Diffusion-Based Image Enhancement
 
 For the Noise module (Noise Folder)
 
