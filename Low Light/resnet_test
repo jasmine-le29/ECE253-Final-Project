@@ -1,0 +1,70 @@
+Cell 1:
+
+import torch
+import torchvision.transforms as transforms
+from torchvision import models
+from PIL import Image
+import os
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader
+
+Cell 2:
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+])
+
+!find data/custom -type d -name ".ipynb_checkpoints" -exec rm -rf {} +
+test_dir = "data/custom"
+
+test_dataset = ImageFolder(root=test_dir, transform=transform)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+
+training_class_names = [
+    'bicycle', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cup', 'dog',
+    'motorbike', 'people', 'table'
+]
+
+name_to_idx = {name: i for i, name in enumerate(training_class_names)}
+
+for i in range(len(test_dataset.samples)):
+    path, _ = test_dataset.samples[i]
+    class_name = path.split('/')[-2].lower()
+
+    if class_name not in name_to_idx:
+        raise ValueError(f"Unknown class folder: {class_name}")
+
+    test_dataset.samples[i] = (path, name_to_idx[class_name])
+
+Cell 3:
+
+num_classes = 12
+
+model = models.resnet50(weights=None)
+model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+
+model.load_state_dict(torch.load("resnet50_exdark.pth", map_location=device))
+model = model.to(device)
+model.eval()
+
+cell 4:
+
+correct = 0
+total = 0
+
+with torch.no_grad():
+    for images, labels in test_loader:
+        images = images.to(device)
+        labels = labels.to(device)
+
+        outputs = model(images)
+        _, preds = torch.max(outputs, 1)
+
+        correct += (preds == labels).sum().item()
+        total += labels.size(0)
+
+accuracy = 100 * correct / total
+print(f"Test Accuracy: {accuracy:.2f}%")
