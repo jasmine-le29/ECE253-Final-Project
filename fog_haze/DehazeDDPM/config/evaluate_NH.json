@@ -1,0 +1,53 @@
+{
+    "name": "Dehaze_NH_Eval",
+    "phase": "val",
+    "gpu_ids": [0],
+
+    "path": {
+        "results": "results_eval",
+        "checkpoint": "pretrained",
+        "pretrain_model_G": "E:/ucsd/ece253/DehazeDDPM/NH_I410000_E31539_gen.pth"
+    },
+
+    "datasets": {
+        "val": {
+            "name": "NH-HAZE-Test",
+            "img_sizeH": 1200,
+            "img_sizeW": 1600,
+            "datarootlq": "./data/NH-HAZE/hazy_test",
+            "dataroothq": "./data/NH-HAZE/gt_test",
+            "datatype": "img",
+            "len": -1
+        }
+    },
+
+    "model": {
+        "which_model_G": "sr3",
+        "finetune_norm": false,
+
+        "unet": {
+            "in_channel": 7,
+            "out_channel": 3,
+            "inner_channel": 64,
+            "channel_multiplier": [1, 2, 4, 8, 8],
+            "attn_res": [16],
+            "res_blocks": 2,
+            "dropout": 0.2
+        },
+
+        "beta_schedule": {
+            "val": {
+                "schedule": "linear",
+                "n_timestep": 2000,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            }
+        },
+
+        "diffusion": {
+            "image_size": 512,
+            "channels": 3,
+            "conditional": true
+        }
+    }
+}

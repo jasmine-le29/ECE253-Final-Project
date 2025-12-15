@@ -1,0 +1,96 @@
+{
+    "name": "Dehaze_NH",
+    "phase": "val", 
+    "gpu_ids": [
+        0
+    ],
+    "path": { 
+        "log": "logs",
+        "tb_logger": "tb_logger",
+        "results": "results",
+        "checkpoint": "checkpoint",
+        "resume_state": "E:/ucsd/ece253/DehazeDDPM/pretrained_PreNet_pth/NH_I410000_E31539",
+        "resume_stateH": "E:/ucsd/ece253/DehazeDDPM/pretrained_PreNet_pth/NH_net_g_80000.pth"
+    },
+    "datasets": {
+        "train": {
+            "name": "ITS",
+            "img_sizeH": 560,  
+            "img_sizeW": 752, 
+            "datarootlq": "./data/NH-HAZE/hazy_train",
+            "dataroothq": "./data/NH-HAZE/gt_train",
+            "datatype": "img", 
+            "batch_size": 1,
+            "num_workers": 0,
+            "use_shuffle": true,
+            "len": -1 
+        },
+        "val": {
+            "name": "SOTS",
+            "img_sizeH": 1200, 
+            "img_sizeW": 1600,
+            "datarootlq": "./test_images",
+            "dataroothq": "./test_images_gt",
+            "datatype": "img",
+            "len": 1 
+        }
+    },
+    "model": {
+        "which_model_G": "sr3", 
+        "finetune_norm": false,
+        "unet": {
+            "in_channel": 7,
+            "out_channel": 3,
+            "inner_channel": 64,
+            "channel_multiplier": [
+                1,
+                2,
+                4,
+                8,
+                8
+            ],
+            "attn_res": [
+                16
+            ],
+            "res_blocks": 2,
+            "dropout": 0.2
+        },
+        "beta_schedule": { 
+            "train": {
+                "schedule": "linear",
+                "n_timestep": 2000,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            },
+            "val": {
+                "schedule": "linear",
+                "n_timestep": 2000,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            }
+        },
+        "diffusion": {
+            "image_size": 512,
+            "channels": 3, 
+            "conditional": true 
+        }
+    },
+    "train": {
+        "n_iter": 2000,
+        "val_freq": 1e4,
+        "save_checkpoint_freq": 1e4,
+        "print_freq": 500,
+        "optimizer": {
+            "type": "adam",
+            "lr": 1e-4
+        },
+        "ema_scheduler": { 
+            "step_start_ema": 5000,
+            "update_ema_every": 1,
+            "ema_decay": 0.9999
+        }
+    },
+    "wandb": {
+        "project": "Dehaze"
+    }
+}
